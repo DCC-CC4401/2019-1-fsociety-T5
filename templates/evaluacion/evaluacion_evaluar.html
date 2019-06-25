@@ -93,7 +93,7 @@
 
         {% if user|is_admin %}
             <div class="w3-panel w3-margin-bottom w3-card-4 w3-padding-16 w3-half w3-right" style="margin-right: 1.8%">
-                <span style="margin-left:21%"><i class="far fa-clock"></i> Hora final 
+                <span style="margin-left:21%"><i class="far fa-clock"></i> Tiempo de Evaluación
                 <input id='hora' class="w3-input w3-border w3-round" type="number" {% if minutos %} value="{{minutos}}" {% endif %} size="1" placeholder="15" style="width:15%; display:inline; margin-left: 10px"> : <input {% if segundos %} value="{{segundos}}" {% endif %} id='minutos' class="w3-input w3-border w3-round" style="width:15%; display:inline" type="number" placeholder="35"></span>
             </div>
         {% endif %}

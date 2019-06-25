@@ -28,7 +28,7 @@ def post_evaluaciones(request):
 import json
 
 @login_required
-def post_postevaluacion(request, evaluacion, fichaEvaluacion, grupo, maximos, respuestas):
+def post_postevaluacion(request, evaluacion, fichaEvaluacion, grupo, maximos, respuestas, esProfesor, t_min, t_max, tiempo):
     
     for respuesta in respuestas:
         for maximo in maximos:
@@ -37,7 +37,7 @@ def post_postevaluacion(request, evaluacion, fichaEvaluacion, grupo, maximos, re
     
     respuestas=json.dumps(respuestas)
 
-    return render(request, 'evaluacion/postevaluacion.html',{'evaluacion':evaluacion, 'fichaEvaluacion':fichaEvaluacion, 'grupo':grupo, 'respuestas': respuestas})
+    return render(request, 'evaluacion/postevaluacion.html',{'evaluacion':evaluacion, 'fichaEvaluacion':fichaEvaluacion, 'grupo':grupo, 'respuestas': respuestas, 'esProfesor': esProfesor, 't_min': t_min, 't_max': t_max, 'tiempo': tiempo})
 
 
 
@@ -141,15 +141,26 @@ def send_evaluacion(request):
         minutos=None
         presentador=None
         tiempo=0
+        descuento = False
 
-        if request.user.groups.filter(name='Profesores').exists():
-            hora=int(request.POST['hora'])
-            minutos=int(request.POST['minutos'])
+        esProfesor = request.user.groups.filter(name='Profesores').exists()
+        if esProfesor:
+            minutos=int(request.POST['hora']) #en realidad indica minutos
+            segundos=int(request.POST['minutos']) #en realidad indica segundos
+
+
             presentador=Alumno.objects.get(pk=int(request.POST['presentador']))
-            tiempo=hora*60+minutos
+            tiempo=minutos*60+segundos  #tiempo en segundos
+            t_min = evaluacion.tiempo_min*60
+            t_max = evaluacion.tiempo_max*60
+
+            if(t_min > tiempo or t_max < tiempo):
+                descuento = True
+
         fichaEvaluacion,created = FichaEvaluacion.objects.get_or_create(evaluacion=evaluacion,
                                                                 evaluador=evaluador,
                                                                 grupo=grupo,
+                                                                descuento=descuento,
                                                                 defaults={'estado_grupo':'N/A',
                                                                 'estado_evaluacion':'N/A',
                                                                 'tiempo':tiempo,
@@ -173,7 +184,20 @@ def send_evaluacion(request):
         
         maximos=json.loads(request.POST['maximos'])
         respuestas=json.loads(request.POST['respuestas'])
-        return post_postevaluacion(request=request, evaluacion=evaluacion, fichaEvaluacion=fichaEvaluacion, grupo=grupo, maximos=maximos, respuestas=respuestas )
+
+
+        tiempo_min = str(evaluacion.tiempo_min) + ":" + "00"
+        tiempo_max = str(evaluacion.tiempo_max) + ":" + "00"
+        segundos = tiempo%60
+        if(segundos == 0):
+            segundos = "00"
+        else:
+            segundos = str(segundos)
+
+        tiempo = str(int(tiempo/60)) + ":" + segundos
+
+        return post_postevaluacion(request=request, evaluacion=evaluacion, fichaEvaluacion=fichaEvaluacion, grupo=grupo, maximos=maximos, respuestas=respuestas, esProfesor=esProfesor, t_min=tiempo_min,
+                                   t_max=tiempo_max, tiempo=tiempo)
             
             
         

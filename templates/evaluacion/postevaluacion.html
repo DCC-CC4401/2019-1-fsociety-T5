@@ -23,8 +23,26 @@
             <div id='resumen'>
             </div>
 
-            
+            {% if esProfesor %}
 
+
+            <div id='tiempo'>
+                <h4><b>Tiempo de evaluación:</b>  {{tiempo}} </h4>
+                <h4><b>Tiempo mínimo de evaluación:</b> {{t_min}} </h4>
+                <h4><b>Tiempo máximo de evaluación:</b> {{t_max}} </h4>
+                <h4><b class="w3-text-blue">Corresponde descuento:</b> {% if fichaEvaluacion.descuento  %}
+                                                        <i class="w3-text-green"> Sí </i>
+                                                        {% else %} <i class="w3-text-red"> No  </i>
+
+                                                        {% endif %}
+                </h4>
+
+
+
+
+            </div>
+
+            {% endif %}
 
 
             <div class=" w3-right w3-half w3-center" style="margin-top: 50px">

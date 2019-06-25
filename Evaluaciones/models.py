@@ -78,6 +78,7 @@ class FichaEvaluacion(models.Model):
     estado_evaluacion = models.CharField(max_length=15)
     tiempo = models.IntegerField(default=0)
     presentador = models.ForeignKey(Alumno, on_delete=models.CASCADE, null=True, blank=True)
+    descuento = models.BooleanField(default=False)
     
 
     def get_evaluation(self):
