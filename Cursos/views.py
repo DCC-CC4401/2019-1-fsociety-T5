@@ -14,7 +14,6 @@ from Evaluaciones.models import Evaluacion, EvaluadoresEvaluacion
 from Alumnos.models import Alumno, Grupo, AlumnosGrupo
 
 
-
 @login_required
 def post_cursos(request):
     form = AddCurso()
@@ -58,14 +57,14 @@ def all_cursos(request):
 def curso_detalle(request, pk):
     curso_id = Curso.objects.get(pk=pk)
     # form para agregar evaluadores al curso
-    bound_evaluador = BoundEvaluador({'curso':curso_id})
+    bound_evaluador = BoundEvaluador({'curso': curso_id})
     # form para agregar evaluaciones al curso
-    add_evaluacion = AddEvaluacion({'curso':curso_id})
-    #form para agregar grupos al curso
-    add_grupo = AddGrupo({'curso':curso_id})
-    #form para modificar un grupo
+    add_evaluacion = AddEvaluacion({'curso': curso_id})
+    # form para agregar grupos al curso
+    add_grupo = AddGrupo({'curso': curso_id})
+    # form para modificar un grupo
     update_grupo = UpdateGrupo({'curso': curso_id})
-    #form para agregar alumnos a un grupo
+    # form para agregar alumnos a un grupo
     bound_alumno = BoundAlumno({'curso': curso_id})
 
     # lista de evaluadores
@@ -97,7 +96,7 @@ def curso_detalle(request, pk):
                                                                  'evaluaciones': evaluaciones,
                                                                  'alumnos': alumnos,
                                                                  'grupos': grupos,
-                                                                 'alumnos_grupo' : alumnos_grupo,
+                                                                 'alumnos_grupo': alumnos_grupo,
                                                                  'listaAlumnosGrupo': listaAlumnosGrupo,
                                                                  'bound_evaluador': bound_evaluador,
                                                                  'add_evaluacion': add_evaluacion,
@@ -133,15 +132,16 @@ def all_grupos(request):
 
 
 @login_required
-def add_grupo(request,pk):
+def add_grupo(request, pk):
     if request.POST and request.user.groups.filter(name='Profesores').exists():
         form = AddGrupo(request.POST, pk)
         if form.is_valid():
-               form.save()
-               messages.success(request, 'Grupo creado correctamente')
-               return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
+            form.save()
+            messages.success(request, 'Grupo creado correctamente')
+            return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
         messages.warning(request, 'El grupo no pudo ser creado')
         return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
+
 
 @login_required
 def delete_grupo(request, pk):
@@ -158,6 +158,7 @@ def delete_grupo(request, pk):
             return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
     messages.warning(request, 'El grupo no pudo ser eliminado')
     return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
+
 
 @login_required
 def update_grupo(request, pk):
@@ -232,6 +233,7 @@ def add_evaluacion(request, pk):
     messages.warning(request, 'La evaluación no pudo ser agregada')
     return HttpResponseRedirect('/cursos/' + str(pk) + '/curso_detalle')
 
+
 @login_required
 def bound_alumno(request, pk):
     """
@@ -240,13 +242,24 @@ def bound_alumno(request, pk):
     :return:
     """
     if request.POST and request.user.groups.filter(name='Profesores').exists():
+
         form = BoundAlumno(request.POST)
-        if form.is_valid():
+
+        # comprobamos si alumno es valido
+        alumnoValido = True
+
+        integrantesGrupo = AlumnosGrupo.objects.all()
+        for integranteGrupo in integrantesGrupo:
+            if int(integranteGrupo.integrante.pk) == int(request.POST.dict()['integrante']):
+                alumnoValido = False
+
+        if form.is_valid() and alumnoValido:
             form.save()
             messages.success(request, 'Alumno asignado correctamente')
             return HttpResponseRedirect('/cursos/' + str(pk) + '/edit_grupo')
-    messages.warning('El alumno no pudo ser asignado')
+    messages.warning(request, 'El alumno no pudo ser asignado')
     return HttpResponseRedirect('/cursos/' + str(pk) + '/edit_grupo')
+
 
 @login_required
 def unbound_alumno(request, pk):
@@ -258,7 +271,7 @@ def unbound_alumno(request, pk):
     if request.POST and request.user.groups.filter(name='Profesores').exists():
         id_grupo = int(request.POST.get('id_grupo'))
         id_alumno = int(request.POST.get('id_alumno'))
-        deleted = AlumnosGrupo.objects.get(grupo=id_grupo, integrante= id_alumno).delete()
+        deleted = AlumnosGrupo.objects.get(grupo=id_grupo, integrante=id_alumno).delete()
 
         if deleted is not None:
             messages.success(request, 'Alumno eliminado correctamente')
@@ -269,12 +282,11 @@ def unbound_alumno(request, pk):
 
 @login_required
 def edit_grupo(request, pk):
-
     grupo = Grupo.objects.get(pk=pk)
     alumnos = AlumnosGrupo.objects.filter(grupo=grupo)
-    update_grupo = UpdateGrupo({'Nombre' : grupo.nombre})
-    bound_alumno = BoundAlumno({'grupo' : grupo})
-    return render(request, 'cursos/editar_grupo.html', {'alumnos' : alumnos,
-                                                            'grupo' : grupo,
-                                                            'update_grupo' : update_grupo,
-                                                            'bound_alumno' : bound_alumno})
+    update_grupo = UpdateGrupo({'Nombre': grupo.nombre})
+    bound_alumno = BoundAlumno({'grupo': grupo})
+    return render(request, 'cursos/editar_grupo.html', {'alumnos': alumnos,
+                                                        'grupo': grupo,
+                                                        'update_grupo': update_grupo,
+                                                        'bound_alumno': bound_alumno})
