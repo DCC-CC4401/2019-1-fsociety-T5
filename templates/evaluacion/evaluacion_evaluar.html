@@ -290,14 +290,16 @@
     }     
             
     //actualizar Rubricas
-// Sending in JSON format using POST method
-//
-function sendEvaluacion(){
-    if(!checkBeforeSend()){
-        return;
-    }
-    
-    
+    // Sending in JSON format using POST method
+    //
+    function sendEvaluacion(){
+        if(!checkBeforeSend()){
+            return;
+        } else {
+            if (!confirm('¿Quieres enviar esta evaluación?')) {
+                return;
+            }
+        }
     
     let hora=0;
     let minutos=0;
@@ -316,18 +318,9 @@ function sendEvaluacion(){
     $('#send-minutos').val(minutos);
     $('#send-maximos').val(JSON.stringify(maximos));
     $('#formSend').submit();
-    
-    
-    
-    
-    
-    
-
 }
             
-            
-            
-        </script>
+</script>
 
 
 

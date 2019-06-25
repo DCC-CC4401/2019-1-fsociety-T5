@@ -817,3 +817,8 @@ MigrationBackup/
 migrations
 
 # End of https://www.gitignore.io/api/linux,macos,django,python,windows,pycharm,database,intellij,visualstudio,visualstudiocode,openframeworks+visualstudio
+
+.idea/
+__psycache__/
+
+*/fixtures/
